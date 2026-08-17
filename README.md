@@ -2,7 +2,7 @@
 
 This repository contains code and data-processing tools for collecting, cleaning, organizing, and validating U.S. state regulatory text.
 
-The project currently focuses on scraping state regulations from Cornell Law School, cleaning the scraped text, and comparing the resulting regulatory text with regulatory statistics from the Mercatus Center / QuantGov (GMU) data.
+The project currently focuses on scraping state regulations from Cornell Law School, cleaning the scraped text, and comparing the resulting regulatory text with regulatory statistics from QuantGov (GMU) data.
 
 ## Project Goals
 
@@ -10,9 +10,9 @@ The main goals of this repository are to:
 
 - Scrape complete state regulatory text from Cornell Law School.
 - Preserve the regulatory hierarchy associated with each regulation.
-- Clean boilerplate text introduced by the Cornell website.
+- Clean text introduced by the Cornell website.
 - Store state regulatory text in a consistent format across states.
-- Compare scraped regulatory text with GMU / QuantGov regulatory statistics.
+- Compare scraped regulatory text with QuantGov regulatory statistics.
 - Validate word counts and regulatory restriction counts across datasets.
 - Build a structured regulatory-text dataset that can later be used for economic and LLM-based analysis.
 
@@ -23,30 +23,43 @@ A typical project structure is:
 ```text
 GSR_work/
 │
-├── states_raw_data/
-│   ├── cornell_california_regulations.csv
-│   ├── cornell_new-york_regulations.csv
-│   ├── cornell_new-mexico_regulations.csv
-│   ├── cornell_arizona_regulations.csv
-│   ├── cornell_texas_regulations.csv
-│   └── ...
+├── 000_papers/
 │
-├── states_clean_data/
-│   ├── california_cleaned_regulation_text.csv
-│   ├── new-york_cleaned_regulation_text.csv
-│   ├── new-mexico_cleaned_regulation_text.csv
-│   ├── arizona_cleaned_regulation_text.csv
-│   ├── texas_cleaned_regulation_text.csv
-│   └── ...
+├── 001_data/
+│   │
+│   ├── states_clean_data/
+│   │   ├── .gitkeep
+│   │   ├── arizona_cleaned_regulation_text.csv
+│   │   ├── california_cleaned_regulation_text.csv
+│   │   ├── new-mexico_cleaned_regulation_text.csv
+│   │   ├── new-york_cleaned_regulation_text.csv
+│   │   └── texas_cleaned_regulation_text.csv
+│   │
+│   ├── states_raw_data/
+│   │   ├── .gitkeep
+│   │   ├── cornell_arizona_failed_urls.csv
+│   │   ├── cornell_arizona_regulations.csv
+│   │   ├── cornell_california_failed_urls.csv
+│   │   ├── cornell_california_regulations.csv
+│   │   ├── cornell_new-mexico_failed_urls.csv
+│   │   ├── cornell_new-mexico_regulations.csv
+│   │   ├── cornell_new-york_failed_urls.csv
+│   │   ├── cornell_new-york_regulations.csv
+│   │   ├── cornell_texas_failed_urls.csv
+│   │   └── cornell_texas_regulations.csv
+│   │
+│   ├── 00_title_scrape_notebook.ipynb
+│   ├── 01_title_clean_up.ipynb
+│   └── scrape.py
 │
-├── gmu_state_data/
-│   ├── california/
-│   │   └── california_restrictions.csv
-│   ├── new-york/
-│   └── ...
+├── 002_compare_GMU/
+│   │
+│   ├── gmu_state_data/
+│   │   └── ...
+│   │
+│   └── 00_compare_to_gmu.ipynb
 │
-├── notebooks/
-├── scripts/
+├── .gitignore
 └── README.md
 ```
 
@@ -303,13 +316,9 @@ A typical workflow for loading data is:
 ```python
 state = "california"
 
-gmu_df = pd.read_csv(
-    f"gmu_state_data/{state}/{state}_restrictions.csv"
-)
+gmu_df = pd.read_csv(f"gmu_state_data/{state}/{state}_restrictions.csv")
 
-df_our_data = pd.read_csv(
-    f"states_clean_data/{state}_cleaned_regulation_text.csv"
-)
+df_our_data = pd.read_csv(f"states_clean_data/{state}_cleaned_regulation_text.csv")
 ```
 
 The data can then be passed into the matching and comparison functions.
@@ -323,16 +332,11 @@ For example:
 ```python
 test_reference = gmu_df.iloc[0]["document_reference"]
 
-matched_df = find_matching_regulations(
-    df_our_data,
-    test_reference,
-)
+matched_df = find_matching_regulations(df_our_data, test_reference)
 
 print(test_reference)
 
-matched_df[
-    ["hierarchy", "text"]
-]
+matched_df[["hierarchy", "text"]]
 ```
 
 This is important because regulatory hierarchies differ across states and not every state uses exactly the same combination or ordering of:
