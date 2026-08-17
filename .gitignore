@@ -1,0 +1,5 @@
+001_data/states_raw_data/*
+!001_data/states_raw_data/.gitkeep
+
+001_data/states_clean_data/*
+!001_data/states_clean_data/.gitkeep
